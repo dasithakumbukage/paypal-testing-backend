@@ -111,7 +111,7 @@ export class PaypalService {
       cert_url: headers.cert_url,
       auth_algo: headers.auth_algo,
       transmission_sig: headers.transmission_sig,
-      webhook_id: `${this.configService.get<string>('PAYPAL_WEBHOOK_ID')}`,
+      webhook_id: `2LW44515CL2593728`,
       webhook_event: headers.body,
     };
     const actualData = JSON.stringify(callBack_data);
