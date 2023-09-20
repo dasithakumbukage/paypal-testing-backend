@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { toJSON } from 'flatted';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class PaypalService {
@@ -98,5 +99,56 @@ export class PaypalService {
     } catch (error) {
       return error;
     }
+  }
+
+  async SubscriptionWebHookCallBack(headers: any) {
+    console.log('headers', headers);
+
+    const accessToken = await this.generateAccessToken();
+    const callBack_data = {
+      transmission_id: headers.transmission_id,
+      transmission_time: headers.transmission_time,
+      cert_url: headers.cert_url,
+      auth_algo: headers.auth_algo,
+      transmission_sig: headers.transmission_sig,
+      webhook_id: `${this.configService.get<string>('PAYPAL_WEBHOOK_ID')}`,
+      webhook_event: headers.body,
+    };
+    const actualData = JSON.stringify(callBack_data);
+    firstValueFrom(
+      this.httpService.post(
+        `${this.configService.get<string>(
+          'PAYPAL_BASE_URL',
+        )}/v1/notifications/verify-webhook-signature`,
+        actualData,
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+      .then(async (res) => {
+        console.log('res', res.data);
+        if (res.data.verification_status == 'SUCCESS') {
+          const subs = await headers.body.resource.subscriber;
+          if (headers.body.event_type === 'CHECKOUT.ORDER.COMPLETED') {
+          }
+        } else {
+          // this.logger.log(
+          //   `getSubscriptionWebHookCallBack: Invalid signature ${
+          //     headers.signature
+          //   } time=${new Date().getTime()}`,
+          // );
+          throw new ForbiddenException('Verification failed');
+        }
+      })
+      .catch((error) => {
+        // this.logger.error(
+        //   `getSubscriptionWebHookCallBack:  ${error} time=${new Date().getTime()}`,
+        // );
+        return error;
+      });
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body ,Headers} from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 
 @Controller('paypal')
@@ -19,8 +19,7 @@ export class PaypalController {
 
   @Post('one-time-payment/webhook')
   async webHookCallBack(
-    @Body() getSubscriptionWebHookCallBack: any,
-    // @Headers() headers: any,
+    @Body() webHookBody: any,
     @Headers('paypal-transmission-id') transmission_id: string,
     @Headers('paypal-transmission-time') transmission_time: string,
     @Headers('paypal-transmission-sig') transmission_sig: string,
@@ -28,14 +27,14 @@ export class PaypalController {
     @Headers('paypal-auth-algo') auth_algo: string,
     @Headers('correlation-id') correlation_id: string,
   ) {
-    return await this.paypalService.getSubscriptionWebHookCallBack({
+    return await this.paypalService.SubscriptionWebHookCallBack({
       transmission_id: transmission_id,
       transmission_time: transmission_time,
       transmission_sig: transmission_sig,
       cert_url: cert_url,
       auth_algo: auth_algo,
       correlation_id: correlation_id,
-      body: getSubscriptionWebHookCallBack,
+      body: webHookBody,
     });
   }
 }
