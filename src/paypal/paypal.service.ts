@@ -109,7 +109,7 @@ export class PaypalService {
     try {
       const accessToken = await this.generateAccessToken();
       fetch(
-        'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-C6SEWAYW9LBP/cancel',
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}/cancel`,
         {
           method: 'POST',
           headers: {
