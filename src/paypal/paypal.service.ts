@@ -201,10 +201,10 @@ export class PaypalService {
     )
       .then(async (res) => {
         if (res.data.verification_status == 'SUCCESS') {
-          const subs = await headers.body.resource.subscriber;
-          console.log('webhook_event', headers.body);
+          // const subs = await headers.body.resource.subscriber;
+          // console.log('webhook_event', headers.body);
           console.log(
-            `event: ${headers.body.event_type}, id: ${headers.body.id}, Time: ${headers.body.create_time}`,
+            `event: ${headers.body.event_type}, id: ${headers.body.resource.id}, Time: ${headers.body.create_time}`,
           );
 
           //onetime
