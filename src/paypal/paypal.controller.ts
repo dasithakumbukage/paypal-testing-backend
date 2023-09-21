@@ -5,34 +5,31 @@ import { PaypalService } from './paypal.service';
 export class PaypalController {
   constructor(private paypalService: PaypalService) {}
 
+  //create subscription
   @Post('create-subscription')
   async createSubscriptionPayment() {
     return await this.paypalService.createSubscriptionPayment();
   }
 
-  @Post('approve-subscription/:id')
-  async approveSubscriptionPayment(@Param('id') subscription_id: string) {
-    console.log('sdfsdfg', subscription_id);
-    return await this.paypalService.approveSubscriptionPayment(subscription_id);
-  }
-
+  //check status in subscription
   @Get('check-subscription/:id')
   async checkSubscriptionPayment(@Param('id') subscription_id: string) {
-    console.log('sdfsdfg', subscription_id);
     return await this.paypalService.checkSubscriptionPayment(subscription_id);
   }
 
+  //create order
   @Get('create-order')
   async createOrder() {
-    const url = await this.paypalService.createOrder();
-    return url;
+    return await this.paypalService.createOrder();
   }
 
-  @Get('create-payment_for_the_order/:id')
+  //approve the order
+  @Get('create-payment-for-the-order/:id')
   async approveOrder(@Param('id') id: string) {
     return await this.paypalService.approveOrder(id);
   }
 
+  //webhook
   @Post('one-time-payment/webhook')
   async webHookCallBack(
     @Body() webHookBody: any,
