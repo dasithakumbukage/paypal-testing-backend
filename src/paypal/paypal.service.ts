@@ -38,7 +38,7 @@ export class PaypalService {
 
       const createOrderResponse = await firstValueFrom(createOrder);
       if (!createOrderResponse.data) return;
-      console.log('createOrder', createOrderResponse.data);
+      // console.log('createOrder', createOrderResponse.data);
       return createOrderResponse.data;
     } catch (error) {
       return error;
@@ -66,7 +66,7 @@ export class PaypalService {
 
       const approveOrderResponse = await firstValueFrom(approveOrder);
       if (!approveOrderResponse.data) return;
-      console.log('approveOrder', approveOrderResponse.data);
+      // console.log('approveOrder', approveOrderResponse.data);
       return approveOrderResponse.data;
     } catch (error) {
       return error;
@@ -96,7 +96,7 @@ export class PaypalService {
 
       if (!createSubscriptionResponse.data.id) return;
 
-      console.log('createSubscriptionPayment', createSubscriptionResponse.data);
+      // console.log('createSubscriptionPayment', createSubscriptionResponse.data);
 
       return createSubscriptionResponse.data.id;
     } catch (error) {
@@ -137,7 +137,7 @@ export class PaypalService {
         },
       );
       const response = await firstValueFrom(createSubscription);
-      console.log('checkSubscriptionPayment', response.data);
+      // console.log('checkSubscriptionPayment', response.data);
 
       return response.data;
     } catch (error) {
@@ -202,7 +202,7 @@ export class PaypalService {
       .then(async (res) => {
         if (res.data.verification_status == 'SUCCESS') {
           const subs = await headers.body.resource.subscriber;
-
+          console.log('webhook_event', headers.body);
           //onetime
           if (headers.body.event_type === 'CHECKOUT.ORDER.APPROVED') {
             // console.log(`event: ${headers.body.event_type}, Time: ${}`);
