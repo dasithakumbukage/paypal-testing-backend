@@ -11,6 +11,12 @@ export class PaypalController {
     return await this.paypalService.createSubscriptionPayment();
   }
 
+  //cancel subscription
+  @Post('cancel-subscription/:id')
+  async cancelSubscription(@Param('id') subscription_id: string) {
+    return await this.paypalService.cancelSubscription(subscription_id);
+  }
+
   //check status in subscription
   @Get('check-subscription/:id')
   async checkSubscriptionPayment(@Param('id') subscription_id: string) {
