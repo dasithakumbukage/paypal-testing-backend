@@ -1,20 +1,36 @@
-import { Controller, Get, Param, Post, Body ,Headers} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Headers } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 
 @Controller('paypal')
 export class PaypalController {
   constructor(private paypalService: PaypalService) {}
 
+  @Post('create-subscription')
+  async createSubscriptionPayment() {
+    return await this.paypalService.createSubscriptionPayment();
+  }
+
+  @Post('approve-subscription/:id')
+  async approveSubscriptionPayment(@Param('id') subscription_id: string) {
+    console.log('sdfsdfg', subscription_id);
+    return await this.paypalService.approveSubscriptionPayment(subscription_id);
+  }
+
+  @Get('check-subscription/:id')
+  async checkSubscriptionPayment(@Param('id') subscription_id: string) {
+    console.log('sdfsdfg', subscription_id);
+    return await this.paypalService.checkSubscriptionPayment(subscription_id);
+  }
+
   @Get('create-order')
-  async createSubscriptionOrder() {
+  async createOrder() {
     const url = await this.paypalService.createOrder();
     return url;
   }
 
   @Get('create-payment_for_the_order/:id')
-  async createSubscriptionPayment(@Param('id') id: string) {
-    console.log('query', id);
-    return await this.paypalService.createPayment(id);
+  async approveOrder(@Param('id') id: string) {
+    return await this.paypalService.approveOrder(id);
   }
 
   @Post('one-time-payment/webhook')

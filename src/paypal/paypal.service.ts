@@ -45,8 +45,8 @@ export class PaypalService {
     }
   }
 
-  //create payment
-  async createPayment(id: any): Promise<any> {
+  //create onetime payment
+  async approveOrder(id: any): Promise<any> {
     //generate access token
     const accessToken = await this.generateAccessToken();
 
@@ -78,6 +78,103 @@ export class PaypalService {
     }
   }
 
+  //create subscription
+  async createSubscriptionPayment() {
+    const accessToken = await this.generateAccessToken();
+
+    try {
+      const createSubscription = this.httpService.post(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions`,
+        {
+          plan_id: 'P-99W8850587882823TMUF3YGI',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const response = await firstValueFrom(createSubscription);
+      return response.data;
+    } catch (error) {
+      // this.logger.error(
+      //   `Cannot create subscription: userId=${userId} time=${new Date().getTime()} ${error}`,
+      // );
+      return error;
+    }
+  }
+
+  //check subscription
+  async checkSubscriptionPayment(subscription_id: any) {
+    const accessToken = await this.generateAccessToken();
+
+    try {
+      const createSubscription = this.httpService.post(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const response = await firstValueFrom(createSubscription);
+      console.log('checkSubscriptionPayment', response.data);
+      return response.data;
+    } catch (error) {
+      // this.logger.error(
+      //   `Cannot create subscription: userId=${userId} time=${new Date().getTime()} ${error}`,
+      // );
+      return error;
+    }
+  }
+
+  //approve subscription
+  async approveSubscriptionPayment(subscription_id: any) {
+    const accessToken = await this.generateAccessToken();
+
+    fetch(
+      `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}/activate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ reason: 'Reactivating the subscription' }),
+      },
+    )
+      .then((res) => res.json())
+      .then((json) => {
+        // res.send(json);
+
+        console.log('createPayment', json);
+        return json;
+      });
+
+    // try {
+    //   const createSubscription = this.httpService.post(
+    //     `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}/activate`,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         Authorization: `Bearer ${accessToken}`,
+    //       },
+    //     },
+    //   );
+    //   const response = await firstValueFrom(createSubscription);
+    //   return response.data;
+    // } catch (error) {
+    //   // this.logger.error(
+    //   //   `Cannot create subscription: userId=${userId} time=${new Date().getTime()} ${error}`,
+    //   // );
+    //   return error;
+    // }
+  }
+
+  //generate the token
   async generateAccessToken() {
     try {
       const token = `${this.configService.get<string>(
@@ -101,6 +198,7 @@ export class PaypalService {
     }
   }
 
+  //webHook
   async SubscriptionWebHookCallBack(headers: any) {
     console.log('headers', headers);
 
@@ -133,6 +231,12 @@ export class PaypalService {
         console.log('res', res.data);
         if (res.data.verification_status == 'SUCCESS') {
           const subs = await headers.body.resource.subscriber;
+          if (headers.body.event_type === 'CHECKOUT.ORDER.APPROVED') {
+          }
+          if (
+            headers.body.event_type === 'CHECKOUT.PAYMENT-APPROVAL.REVERSED'
+          ) {
+          }
           if (headers.body.event_type === 'CHECKOUT.ORDER.COMPLETED') {
           }
         } else {
