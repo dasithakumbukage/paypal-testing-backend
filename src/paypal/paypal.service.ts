@@ -108,25 +108,16 @@ export class PaypalService {
   async cancelSubscription(subscription_id: any) {
     try {
       const accessToken = await this.generateAccessToken();
-
-      const cancelSubscription = this.httpService.post(
-        `https://api-m.paypal.com/v1/billing/subscriptions/${subscription_id}/cancel`,
+      fetch(
+        'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-C6SEWAYW9LBP/cancel',
         {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         },
       );
-
-      const cancelSubscriptionResponse =
-        await firstValueFrom(cancelSubscription);
-
-      if (!cancelSubscriptionResponse.data.id) return;
-
-      console.log('cancelSubscriptionPayment', cancelSubscriptionResponse.data);
-
-      return cancelSubscriptionResponse.data.id;
     } catch (error) {
       throw error; // Rethrow the error to handle it elsewhere if needed
     }
@@ -211,8 +202,10 @@ export class PaypalService {
       .then(async (res) => {
         if (res.data.verification_status == 'SUCCESS') {
           const subs = await headers.body.resource.subscriber;
+          
           //onetime
           if (headers.body.event_type === 'CHECKOUT.ORDER.APPROVED') {
+            // console.log(`event: ${headers.body.event_type}, Time: ${}`);
           }
           if (
             headers.body.event_type === 'CHECKOUT.PAYMENT-APPROVAL.REVERSED'

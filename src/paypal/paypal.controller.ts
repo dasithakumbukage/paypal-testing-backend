@@ -36,7 +36,7 @@ export class PaypalController {
   }
 
   //webhook
-  @Post('one-time-payment/webhook')
+  @Post('payment/webhook')
   async webHookCallBack(
     @Body() webHookBody: any,
     @Headers('paypal-transmission-id') transmission_id: string,
