@@ -38,7 +38,7 @@ export class PaypalService {
 
       const createOrderResponse = await firstValueFrom(createOrder);
       if (!createOrderResponse.data) return;
-      console.log('createOrder', createOrderResponse.data);
+      console.log('createOrder', createOrderResponse);
       return createOrderResponse.data;
     } catch (error) {
       return error;
