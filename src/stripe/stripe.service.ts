@@ -87,8 +87,7 @@ export class StripeService {
 
   //webHook
   async paymentWebhook(data: Buffer, signature: string) {
-
-        const callbackData = JSON.parse(data.toString());
+    const callbackData = JSON.parse(data.toString());
 
     const event = this.stripe.webhooks.constructEvent(
       data,
@@ -96,7 +95,11 @@ export class StripeService {
       'whsec_FDzJpfYoFeNuHQfuHa2BarRcGJLwbq38',
     );
 
-
-    console.log('event', event.type, 'subscription ID', callbackData);
+    console.log(
+      'Stripe event',
+      event.type,
+      'subscription ID',
+      callbackData.data.object?.id,
+    );
   }
 }
