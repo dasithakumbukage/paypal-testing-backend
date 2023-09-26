@@ -90,7 +90,7 @@ export class StripeService {
     console.log('paymentWebhook body', data, 'signature', signature);
 
     const event = this.stripe.webhooks.constructEvent(
-      JSON.stringify(data),
+      data,
       signature,
       'whsec_psJrx9neB53UOXHiOjbemvta5CsZ9Y5l',
     );
