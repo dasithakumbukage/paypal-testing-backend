@@ -90,7 +90,7 @@ export class StripeService {
     const event = this.stripe.webhooks.constructEvent(
       data,
       signature,
-      'whsec_psJrx9neB53UOXHiOjbemvta5CsZ9Y5l',
+      'whsec_FDzJpfYoFeNuHQfuHa2BarRcGJLwbq38',
     );
 
     console.log('event', event.data.object);
