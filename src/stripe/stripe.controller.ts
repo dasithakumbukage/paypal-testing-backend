@@ -15,8 +15,8 @@ export class StripeController {
   @Post(`subscription-webhook`)
   async paymentWebhook(
     @Body() data: any,
-    @Headers('stripe-signature') signature: string,
+    @Headers('stripe-signature') sig: string,
   ) {
-    return await this.stripeService.paymentWebhook(data, signature);
+    return await this.stripeService.paymentWebhook(data, sig);
   }
 }
