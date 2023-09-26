@@ -28,7 +28,7 @@ async function bootstrap() {
     ],
   });
 
-  app.use(bodyParser.json());
+  // app.use(bodyParser.json());
   const port = configService.get('PORT');
   console.log(port);
   await app.listen(port);
