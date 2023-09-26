@@ -93,6 +93,7 @@ export class StripeService {
       'whsec_FDzJpfYoFeNuHQfuHa2BarRcGJLwbq38',
     );
 
+    
     console.log('event', event.type, 'subscription ID', data);
   }
 }
