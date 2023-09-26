@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import * as bodyParser from 'body-parser';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +28,10 @@ async function bootstrap() {
     ],
   });
 
-  // app.use(bodyParser.json());
+  app.use(
+    '/stripe/subscription-webhook',
+    express.raw({ type: 'application/json' }),
+  );
   const port = configService.get('PORT');
   console.log(port);
   await app.listen(port);

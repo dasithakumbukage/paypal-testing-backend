@@ -87,7 +87,7 @@ export class StripeService {
 
   //webHook
   async paymentWebhook(data: Buffer, signature: string) {
-    console.log('paymentWebhook body', data, 'signature', typeof signature);
+    console.log('paymentWebhook body', data, 'signature', signature);
 
     const event = this.stripe.webhooks.constructEvent(
       JSON.stringify(data),
