@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Param, Post, Req, Res } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 
 @Controller('stripe')
@@ -18,5 +18,11 @@ export class StripeController {
     @Headers('stripe-signature') signature: string,
   ) {
     return await this.stripeService.paymentWebhook(data, signature);
+  }
+
+  //cancel membership
+  @Post('cancel-membership-subscription/:id')
+  async cancelMembershipSubscription(@Param('id') id: string) {
+    return await this.stripeService.cancelMembershipSubscription(id);
   }
 }

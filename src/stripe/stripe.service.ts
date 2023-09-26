@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { ICustomer } from './stripe.types';
 
@@ -101,5 +101,18 @@ export class StripeService {
       'subscription ID',
       callbackData.data.object?.id,
     );
+  }
+
+  //cancel memberships
+  async cancelMembershipSubscription(id: any) {
+    //cancel subscription i <=subscriptions length
+    const deleted = await this.stripe.subscriptions.cancel(id);
+
+    console.log('deleted', deleted);
+    // if (!status || !id) {
+    //   throw new ForbiddenException(`Cannot cancel subscription at this time`);
+    // } else {
+    //   return true;
+    // }
   }
 }
