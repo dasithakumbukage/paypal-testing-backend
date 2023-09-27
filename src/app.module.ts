@@ -11,6 +11,7 @@ import { PaypalModule } from './paypal/paypal.module';
 import { configValidationSchema } from './config/config.schema';
 import { ConfigModule } from '@nestjs/config';
 import { StripeModule } from './stripe/stripe.module';
+import { CoinPaymentModule } from './coin-payment/coin-payment.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StripeModule } from './stripe/stripe.module';
     BikeModule,
     PaypalModule,
     StripeModule,
+    CoinPaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService, CarService, BikeService],
