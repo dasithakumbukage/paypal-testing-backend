@@ -1,4 +1,12 @@
-import { Body, Controller, Headers, Param, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Param,
+  Post,
+  Get,
+  Res,
+} from '@nestjs/common';
 import { StripeService } from './stripe.service';
 
 @Controller('stripe')
@@ -24,5 +32,11 @@ export class StripeController {
   @Post('cancel-membership-subscription/:id')
   async cancelMembershipSubscription(@Param('id') id: string) {
     return await this.stripeService.cancelMembershipSubscription(id);
+  }
+
+  //list all active subscriptions
+  @Get('get-all-active-subscriptions')
+  async listActiveSubscription() {
+    return await this.stripeService.listActiveSubscription();
   }
 }

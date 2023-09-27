@@ -108,11 +108,19 @@ export class StripeService {
     //cancel subscription i <=subscriptions length
     const deleted = await this.stripe.subscriptions.cancel(id);
 
-    console.log('deleted', deleted);
-    // if (!status || !id) {
-    //   throw new ForbiddenException(`Cannot cancel subscription at this time`);
-    // } else {
-    //   return true;
-    // }
+    if (!deleted) {
+      throw new ForbiddenException(`Cannot cancel subscription at this time`);
+    } else {
+      return true;
+    }
+  }
+
+  //list all active subscriptions
+  async listActiveSubscription() {
+    const subscriptions = await this.stripe.subscriptions.list({
+      limit: 5,
+    });
+
+    return subscriptions;
   }
 }
