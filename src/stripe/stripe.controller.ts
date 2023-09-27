@@ -39,4 +39,10 @@ export class StripeController {
   async listActiveSubscription() {
     return await this.stripeService.listActiveSubscription();
   }
+
+  //one time payment
+  @Post('create-one-time-payment')
+  async createOneTimePayment() {
+    return await this.stripeService.createOneTimePayment();
+  }
 }

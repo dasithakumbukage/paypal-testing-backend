@@ -123,4 +123,17 @@ export class StripeService {
 
     return subscriptions;
   }
+
+  //one time payment
+  async createOneTimePayment() {
+    const subscriptions = await this.stripe.paymentIntents.create({
+      amount: 1099,
+      currency: 'usd',
+      payment_method_types: ['card'],
+      confirm: true,
+      payment_method: 'pm_1NurwbA5JEtiO6bc5Rw5t8us', //get this from frontend
+    });
+
+    return subscriptions;
+  }
 }
