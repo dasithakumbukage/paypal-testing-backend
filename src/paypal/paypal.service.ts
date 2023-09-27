@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { toJSON } from 'flatted';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class PaypalService {
@@ -13,70 +14,141 @@ export class PaypalService {
 
   //create order
   async createOrder(): Promise<any> {
-    //generate access token
     const accessToken = await this.generateAccessToken();
 
     try {
-      const response = await fetch(
+      const createOrder = this.httpService.post(
         'https://api-m.sandbox.paypal.com/v2/checkout/orders',
         {
-          //https://developer.paypal.com/docs/api/orders/v2/#orders_create
-          method: 'POST',
+          intent: 'CAPTURE',
+          purchase_units: [
+            {
+              amount: { currency_code: 'USD', value: '70.00' },
+            },
+          ],
+        },
+        {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
             'PayPal-Request-Id': Date.now().toString(),
           },
-          body: JSON.stringify({
-            intent: 'CAPTURE',
-            purchase_units: [
-              {
-                // reference_id: 'd9f80740-38f0-11e8-b467-0ed5f89f718b',
-                amount: { currency_code: 'USD', value: '70.00' },
-              },
-            ],
-          }),
         },
       );
-      return response.json();
+
+      const createOrderResponse = await firstValueFrom(createOrder);
+      if (!createOrderResponse.data) return;
+      // console.log('createOrder', createOrderResponse);
+      return createOrderResponse.data;
     } catch (error) {
       return error;
     }
   }
 
-  //create payment
-  async createPayment(id: any): Promise<any> {
-    //generate access token
+  //create onetime payment
+  async approveOrder(id: any): Promise<any> {
     const accessToken = await this.generateAccessToken();
 
     try {
-      fetch(
+      const approveOrder = this.httpService.post(
         `https://api-m.sandbox.paypal.com/v2/checkout/orders/${id}/capture`,
+        {
+          amount: { currency_code: 'USD', value: '70.00' },
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+            'PayPal-Request-Id': Date.now().toString(),
+          },
+        },
+      );
+
+      const approveOrderResponse = await firstValueFrom(approveOrder);
+      if (!approveOrderResponse.data) return;
+      // console.log('approveOrder', approveOrderResponse.data);
+      return approveOrderResponse.data;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  //create subscription
+  async createSubscriptionPayment() {
+    try {
+      const accessToken = await this.generateAccessToken();
+
+      const createSubscription = this.httpService.post(
+        'https://api-m.sandbox.paypal.com/v1/billing/subscriptions',
+        {
+          plan_id: 'P-0VL4687953917625XMUF66EQ',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      const createSubscriptionResponse =
+        await firstValueFrom(createSubscription);
+
+      if (!createSubscriptionResponse.data.id) return;
+
+      // console.log('createSubscriptionPayment', createSubscriptionResponse.data);
+
+      return createSubscriptionResponse.data.id;
+    } catch (error) {
+      throw error; // Rethrow the error to handle it elsewhere if needed
+    }
+  }
+
+  //cancel subscription
+  async cancelSubscription(subscription_id: any) {
+    try {
+      const accessToken = await this.generateAccessToken();
+      fetch(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}/cancel`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
-            'PayPal-Request-Id': '123e4567-e89b-12d3-a456-426655440010',
           },
-          body: JSON.stringify({
-            // reference_id: 'd9f80740-38f0-11e8-b467-0ed5f89f718b',
-            amount: { currency_code: 'USD', value: '70.00' },
-          }),
         },
-      )
-        .then((res) => res.json())
-        .then((json) => {
-          // res.send(json);
-
-          console.log('createPayment', json);
-          return json;
-        });
+      );
     } catch (error) {
+      throw error; // Rethrow the error to handle it elsewhere if needed
+    }
+  }
+
+  //check subscription
+  async checkSubscriptionPayment(subscription_id: any) {
+    const accessToken = await this.generateAccessToken();
+    try {
+      const createSubscription = this.httpService.get(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscription_id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const response = await firstValueFrom(createSubscription);
+      // console.log('checkSubscriptionPayment', response.data);
+
+      return response.data;
+    } catch (error) {
+      // this.logger.error(
+      //   `Cannot create subscription: userId=${userId} time=${new Date().getTime()} ${error}`,
+      // );
       return error;
     }
   }
 
+  //generate the token
   async generateAccessToken() {
     try {
       const token = `${this.configService.get<string>(
@@ -98,5 +170,84 @@ export class PaypalService {
     } catch (error) {
       return error;
     }
+  }
+
+  //webHook
+  async SubscriptionWebHookCallBack(headers: any) {
+    const accessToken = await this.generateAccessToken();
+    const callBack_data = {
+      transmission_id: headers.transmission_id,
+      transmission_time: headers.transmission_time,
+      cert_url: headers.cert_url,
+      auth_algo: headers.auth_algo,
+      transmission_sig: headers.transmission_sig,
+      webhook_id: `6K543883X88838235`,
+      webhook_event: headers.body,
+    };
+    const actualData = JSON.stringify(callBack_data);
+    firstValueFrom(
+      this.httpService.post(
+        `${this.configService.get<string>(
+          'PAYPAL_BASE_URL',
+        )}/v1/notifications/verify-webhook-signature`,
+        actualData,
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+      .then(async (res) => {
+        if (res.data.verification_status == 'SUCCESS') {
+          // const subs = await headers.body.resource.subscriber;
+          // console.log('webhook_event', headers.body);
+          console.log(
+            `event: ${headers.body.event_type}, id: ${headers.body.resource.id}, Time: ${headers.body.create_time}`,
+          );
+
+          //onetime
+          if (headers.body.event_type === 'CHECKOUT.ORDER.APPROVED') {
+            // console.log(`event: ${headers.body.event_type}, Time: ${}`);
+          }
+          if (
+            headers.body.event_type === 'CHECKOUT.PAYMENT-APPROVAL.REVERSED'
+          ) {
+          }
+          if (headers.body.event_type === 'CHECKOUT.ORDER.COMPLETED') {
+          }
+          //subscription
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.CREATED') {
+          }
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.ACTIVATED') {
+          }
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.UPDATED') {
+          }
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.EXPIRED') {
+          }
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.CANCELLED') {
+          }
+          if (headers.body.event_type === 'BILLING.SUBSCRIPTION.SUSPENDED') {
+          }
+          if (
+            headers.body.event_type === 'BILLING.SUBSCRIPTION.PAYMENT.FAILED'
+          ) {
+          }
+        } else {
+          // this.logger.log(
+          //   `getSubscriptionWebHookCallBack: Invalid signature ${
+          //     headers.signature
+          //   } time=${new Date().getTime()}`,
+          // );
+          throw new ForbiddenException('Verification failed');
+        }
+      })
+      .catch((error) => {
+        // this.logger.error(
+        //   `getSubscriptionWebHookCallBack:  ${error} time=${new Date().getTime()}`,
+        // );
+        return error;
+      });
   }
 }

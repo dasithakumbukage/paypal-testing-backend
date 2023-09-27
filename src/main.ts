@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,7 +9,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: [
+      'http://localhost:3000',
+      'https://paymentsfrontend-production.up.railway.app',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     credentials: true,
@@ -24,6 +28,10 @@ async function bootstrap() {
     ],
   });
 
+  app.use(
+    '/stripe/subscription-webhook',
+    express.raw({ type: 'application/json' }),
+  );
   const port = configService.get('PORT');
   console.log(port);
   await app.listen(port);

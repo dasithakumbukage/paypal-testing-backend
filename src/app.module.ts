@@ -10,6 +10,7 @@ import { BikeModule } from './bike/bike.module';
 import { PaypalModule } from './paypal/paypal.module';
 import { configValidationSchema } from './config/config.schema';
 import { ConfigModule } from '@nestjs/config';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     JeepModule,
     BikeModule,
     PaypalModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, CarService, BikeService],

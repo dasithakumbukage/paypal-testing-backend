@@ -1,26 +1,44 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Headers } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 
 @Controller('paypal')
 export class PaypalController {
   constructor(private paypalService: PaypalService) {}
 
+  //create subscription
+  @Post('create-subscription')
+  async createSubscriptionPayment() {
+    return await this.paypalService.createSubscriptionPayment();
+  }
+
+  //cancel subscription
+  @Post('cancel-subscription/:id')
+  async cancelSubscription(@Param('id') subscription_id: string) {
+    return await this.paypalService.cancelSubscription(subscription_id);
+  }
+
+  //check status in subscription
+  @Get('check-subscription/:id')
+  async checkSubscriptionPayment(@Param('id') subscription_id: string) {
+    return await this.paypalService.checkSubscriptionPayment(subscription_id);
+  }
+
+  //create order
   @Get('create-order')
-  async createSubscriptionOrder() {
-    const url = await this.paypalService.createOrder();
-    return url;
+  async createOrder() {
+    return await this.paypalService.createOrder();
   }
 
-  @Get('create-payment_for_the_order/:id')
-  async createSubscriptionPayment(@Param('id') id: string) {
-    console.log('query', id);
-    return await this.paypalService.createPayment(id);
+  //approve the order
+  @Get('create-payment-for-the-order/:id')
+  async approveOrder(@Param('id') id: string) {
+    return await this.paypalService.approveOrder(id);
   }
 
-  @Post('one-time-payment/webhook')
+  //webhook
+  @Post('payment/webhook')
   async webHookCallBack(
-    @Body() getSubscriptionWebHookCallBack: any,
-    // @Headers() headers: any,
+    @Body() webHookBody: any,
     @Headers('paypal-transmission-id') transmission_id: string,
     @Headers('paypal-transmission-time') transmission_time: string,
     @Headers('paypal-transmission-sig') transmission_sig: string,
@@ -28,14 +46,14 @@ export class PaypalController {
     @Headers('paypal-auth-algo') auth_algo: string,
     @Headers('correlation-id') correlation_id: string,
   ) {
-    return await this.paypalService.getSubscriptionWebHookCallBack({
+    return await this.paypalService.SubscriptionWebHookCallBack({
       transmission_id: transmission_id,
       transmission_time: transmission_time,
       transmission_sig: transmission_sig,
       cert_url: cert_url,
       auth_algo: auth_algo,
       correlation_id: correlation_id,
-      body: getSubscriptionWebHookCallBack,
+      body: webHookBody,
     });
   }
 }
