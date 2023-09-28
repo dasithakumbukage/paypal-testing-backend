@@ -19,6 +19,12 @@ export class StripeService {
   async createMembership(data: any) {
     const { amount, userId, paymentMethodId } = data;
 
+    //add test clocks to testing purposes. If not comment this
+    let testClock: Stripe.TestHelpers.TestClock | null = null;
+    testClock = await this.stripe.testHelpers.testClocks.create({
+      frozen_time: Math.round(Date.now() / 1000),
+    });
+
     const stripe_customer_id = await this.stripe.customers
       .create({
         name: 'test',
@@ -31,6 +37,7 @@ export class StripeService {
           postal_code: '',
         },
         phone: '',
+        test_clock: testClock?.id || '',
       })
       .then(async (res) => {
         return res.id;
