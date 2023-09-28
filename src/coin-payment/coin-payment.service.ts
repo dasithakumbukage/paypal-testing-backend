@@ -28,7 +28,6 @@ export class CoinPaymentService {
         ipn_url: `https://paypal-testing-backend-production.up.railway.app/coin-payment/coin-payment-webhook`,
       })
       .then(async (res) => {
-        console.log('createTransaction', res);
         return res;
       })
       .catch(async (error) => {
