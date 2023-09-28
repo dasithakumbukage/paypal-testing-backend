@@ -47,7 +47,7 @@ export class CoinPaymentService {
       throw new ForbiddenException('cannot continue your request');
     }
 
-    console.log('callBackData.status', callBackData.status);
+    console.log('coinPayments callBackData.status', callBackData.status);
 
     //pending
     if (callBackData.status === '0') {
